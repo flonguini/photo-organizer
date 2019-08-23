@@ -35,5 +35,6 @@ class PhotoOrganizer:
             self.move_photo(filename)
 
 
-PO = PhotoOrganizer()
-PO.organize()
+if __name__ == "__main__":
+    PO = PhotoOrganizer()
+    PO.organize()
