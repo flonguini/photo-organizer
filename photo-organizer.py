@@ -3,15 +3,16 @@ import shutil
 from datetime import datetime
 from PIL import Image
 
-
 class PhotoOrganizer:
     extensions = ['jpg', 'jpeg', 'JPG', 'JPEG']
 
-    def folder_path_from_photo_date(self, file):
-        date = self.photo_shooting_date(file)
+    @staticmethod
+    def folder_path_from_photo_date(file):
+        date = PhotoOrganizer.photo_shooting_date(file)
         return date.strftime('%Y') + '/' + date.strftime('%Y-%m-%d')
 
-    def photo_shooting_date(self, file):
+    @staticmethod
+    def photo_shooting_date(file):
         photo = Image.open(file)
         info = photo._getexif()
         date = datetime.fromtimestamp(os.path.getmtime(file))
@@ -21,20 +22,42 @@ class PhotoOrganizer:
                 date = datetime.strptime(date, '%Y:%m:%d %H:%M:%S')
         return date
 
-    def move_photo(self, file):
-        new_folder = self.folder_path_from_photo_date(file)
+    @staticmethod
+    def move_photo(file):
+        new_folder = PhotoOrganizer.folder_path_from_photo_date(file)
         if not os.path.exists(new_folder):
             os.makedirs(new_folder)
         shutil.move(file, new_folder + '/' + file)
 
-    def organize(self):
+    @staticmethod
+    def organize():
+        PhotoOrganizer.create_extensions_to_organize()
+        
         photos = [
-            filename for filename in os.listdir('.') if any(filename.endswith(ext) for ext in self.extensions)
+            filename for filename in os.listdir('.') if any(filename.endswith(ext) for ext in PhotoOrganizer.extensions)
         ]
         for filename in photos:
-            self.move_photo(filename)
+            PhotoOrganizer.move_photo(filename)
+
+    @staticmethod
+    def create_extensions_to_organize():
+        if (not os.path.isfile("extensions.txt")):
+            f = open("extensions.txt", "w+")
+            f.write("jpg\njpeg\nJPG\nJPEG")
+            f.close()
+
+        PhotoOrganizer.get_extensions_to_organize()
+
+    @staticmethod
+    def get_extensions_to_organize():
+        f=open("extensions.txt", "r")
+        f1 = f.readlines()
+
+        PhotoOrganizer.extensions.clear()
+
+        for line in f1:
+            PhotoOrganizer.extensions.append(line.strip())
 
 
 if __name__ == "__main__":
-    PO = PhotoOrganizer()
-    PO.organize()
+    PhotoOrganizer().organize()
